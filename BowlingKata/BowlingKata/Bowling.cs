@@ -1,24 +1,24 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace BowlingKata
 {
     public class Bowling
     {
         private const int NumberOfPins = 10;
-
         private readonly List<int> _rolls = new List<int>();
 
         public void Roll(int pins)
         {
             _rolls.Add(pins);
 
-            if(LastRollIsStrike())
+            if (LastRollIsStrike())
                 _rolls.Add(0);
         }
 
         private bool LastRollIsStrike()
         {
-            return IsOddNumber(_rolls.Count) && _rolls[_rolls.Count -1] == NumberOfPins;
+            return IsOddNumber(_rolls.Count) && _rolls.Last() == NumberOfPins;
         }
 
         private static bool IsOddNumber(int number)
@@ -39,17 +39,14 @@ namespace BowlingKata
 
         private int CalculateScoreFor(int frame)
         {
-            if(IsStrikeAt(frame))
-                return StrikeScoreFor(frame);
-
-            if (IsSpareAt(frame))
-                return SpareScoreFor(frame);
-
-            return IntialScoreFor(frame);
+            return StrikeScoreFor(frame) ?? SpareScoreFor(frame) ?? IntialScoreFor(frame);
         }
 
-        private int StrikeScoreFor(int frame)
+        private int? StrikeScoreFor(int frame)
         {
+            if (!IsStrikeAt(frame))
+                return null;
+
             int score = IntialScoreFor(frame) + IntialScoreFor(Next(frame));
 
             if (IsStrikeAt(Next(frame)))
@@ -58,8 +55,11 @@ namespace BowlingKata
             return score;
         }
 
-        private int SpareScoreFor(int frame)
+        private int? SpareScoreFor(int frame)
         {
+            if (!IsSpareAt(frame))
+                return null;
+
             return IntialScoreFor(frame) + ScoreAt(FirstRollFor(Next(frame)));
         }
 
